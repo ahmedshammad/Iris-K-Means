@@ -1,0 +1,185 @@
+import warnings
+
+# Ignore FutureWarning from sklearn
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn.cluster._kmeans")
+
+# Ignore UserWarning from sklearn
+warnings.filterwarnings("ignore", category=UserWarning, module="sklearn.cluster._kmeans")
+
+# Your code here
+
+
+import pandas as pd
+import numpy as np
+
+import matplotlib.pyplot as plt
+from pylab import rcParams
+import seaborn as sns
+%matplotlib inline
+
+rcParams['figure.figsize'] = 7,4
+
+import sklearn
+from sklearn.preprocessing import scale
+from sklearn.preprocessing import MinMaxScaler
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import confusion_matrix, classification_report
+
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn import datasets
+
+####    from mpl_toolkits.mplot3d import Axes3D:
+This line imports the Axes3D class from the mpl_toolkits.mplot3d module, which is a part of the Matplotlib library. Axes3D is used to create 3D plots in Matplotlib. If you want to visualize data in three dimensions, this import is necessary.
+
+   ####    from sklearn import datasets:
+This line imports the datasets module from the scikit-learn library. Scikit-learn is a popular machine learning library in Python. The datasets module provides access to various built-in datasets that can be used for practicing and testing machine learning algorithms. It includes datasets like the famous Iris dataset, digits dataset, and more.
+
+# 
+
+# 
+
+iris = datasets.load_iris()
+type(iris)
+iris
+
+x = scale(iris.data)
+x
+
+y = pd.DataFrame(iris.target,columns=['Target'])
+y
+
+iris_df = pd.DataFrame(iris.data,columns=iris.feature_names)
+iris_df
+
+# 
+
+## Building and running your model
+
+clustering = KMeans(n_clusters=3,random_state=5)
+
+clustering.fit(x)
+
+## Plotting your model outputs
+
+iris_df = pd.DataFrame(iris.data,columns=['Sepal_Length', 'Sepal_Width', 'Petal_Length', 'Petal_Width'])
+iris_df
+
+color_theme = np.array(['darkgray', 'lightsalmon', 'powderblue'])
+plt.subplot(2,1,1)
+plt.scatter(x=iris_df.Petal_Length, y=iris_df.Petal_Width, c=color_theme[clustering.labels_], s=50)
+plt.subplot(2,1,2)
+plt.scatter(x=iris_df.Petal_Length, y=iris_df.Petal_Width, c=color_theme[iris.target], s=50)
+
+
+color_theme = np.array(['darkgray', 'lightsalmon', 'powderblue'])
+
+plt.subplot(1,2,1)
+
+plt.scatter(x=iris_df.Petal_Length, y=iris_df.Petal_Width, c=color_theme[iris.target], s=50)
+plt.title('Ground Truth Classification')
+
+plt.subplot(1,2,2)
+
+plt.scatter(x=iris_df.Petal_Length, y=iris_df.Petal_Width, c=color_theme[clustering.labels_], s=50)
+plt.title('K-Means Classification')
+
+relabel = np.choose(clustering.labels_, [2, 0, 1]).astype(np.int64)
+
+plt.subplot(1,2,1)
+
+plt.scatter(x=iris_df.Petal_Length, y=iris_df.Petal_Width, c=color_theme[iris.target], s=50)
+plt.title('Ground Truth Classification')
+
+plt.subplot(1,2,2)
+
+plt.scatter(x=iris_df.Petal_Length, y=iris_df.Petal_Width, c=color_theme[relabel], s=50)
+plt.title('K-Means Classification')
+
+## Evaluate your clustering results
+
+print(classification_report(y, relabel))
+
+# 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+
+# 
+
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+from mpl_toolkits.mplot3d import Axes3D
+
+# Load the Iris dataset
+iris = datasets.load_iris()
+iris_df = pd.DataFrame(data= np.c_[iris['data'], iris['target']], columns= iris['feature_names'] + ['target'])
+
+# Extract features (excluding target variable)
+X = iris.data
+
+# Standardize the features
+scaler = StandardScaler()
+X_std = scaler.fit_transform(X)
+
+# Determine the optimal number of clusters using the Elbow Method
+# Inertia is the sum of squared distances of samples to their closest cluster center
+inertia = []
+for k in range(1, 11):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(X_std)
+    inertia.append(kmeans.inertia_)
+
+# Plot the Elbow Method graph
+plt.plot(range(1, 11), inertia, marker='o')
+plt.title('Elbow Method for Optimal k')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Inertia')
+plt.show()
+
+# Based on the Elbow Method, we choose k=3
+
+# Apply K-Means clustering with k=3
+kmeans = KMeans(n_clusters=3, random_state=42)
+kmeans.fit(X_std)
+
+# Add the predicted cluster labels to the original dataset
+iris_df['cluster'] = kmeans.labels_
+
+# Visualize the clusters in 3D space
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111, projection='3d')
+
+# Scatter plot for three features (change these based on your preference)
+ax.scatter(iris_df['sepal length (cm)'], iris_df['sepal width (cm)'], iris_df['petal length (cm)'],
+           c=iris_df['cluster'], cmap='viridis', s=50)
+
+ax.set_xlabel('Sepal Length (cm)')
+ax.set_ylabel('Sepal Width (cm)')
+ax.set_zlabel('Petal Length (cm)')
+ax.set_title('K-Means Clustering of Iris Dataset')
+
+plt.show()
+
+# Evaluate the clustering using silhouette score
+silhouette_avg = silhouette_score(X_std, kmeans.labels_)
+print(f"Silhouette Score for the Clustering: {silhouette_avg:.2f}")
+
+
